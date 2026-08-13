@@ -97,46 +97,93 @@
     // GPS定位
     // ==============================
 
-    let userMarker = null;
+// ==============================
+// GPS 定位
+// ==============================
 
-    document.getElementById("locate").onclick = function () {
+let userMarker = null;
+let accuracyCircle = null;
 
-        if (!navigator.geolocation) {
-            alert("当前浏览器不支持定位");
-            return;
-        }
+document.getElementById("locate").onclick = function () {
 
-        navigator.geolocation.getCurrentPosition(
-            function(position) {
+    if (!navigator.geolocation) {
+        alert("当前设备不支持 GPS 定位");
+        return;
+    }
 
-                const lng = position.coords.longitude;
-                const lat = position.coords.latitude;
+    navigator.geolocation.getCurrentPosition(
+        function(position) {
 
-                if (userMarker) {
-                    userMarker.remove();
-                }
+            const lng = position.coords.longitude;
+            const lat = position.coords.latitude;
+            const accuracy = position.coords.accuracy;
 
-                userMarker =
-                    new maplibregl.Marker()
-                        .setLngLat([lng, lat])
-                        .addTo(map);
-
-                map.flyTo({
-                    center: [lng, lat],
-                    zoom: 16
-                });
-            },
-
-            function(error) {
-                alert("无法获取当前位置：" + error.message);
-            },
-
-            {
-                enableHighAccuracy: true,
-                timeout: 10000
+            // 删除旧位置
+            if (userMarker) {
+                userMarker.remove();
             }
-        );
-    };
+
+            // 创建当前位置点
+            const el = document.createElement("div");
+
+            el.style.width = "18px";
+            el.style.height = "18px";
+            el.style.borderRadius = "50%";
+            el.style.background = "#1976ff";
+            el.style.border = "3px solid white";
+            el.style.boxShadow = "0 1px 6px rgba(0,0,0,.4)";
+            el.style.boxSizing = "border-box";
+
+            userMarker = new maplibregl.Marker({
+                element: el
+            })
+            .setLngLat([lng, lat])
+            .addTo(map);
+
+            // 移动地图到当前位置
+            map.flyTo({
+                center: [lng, lat],
+                zoom: 16,
+                essential: true
+            });
+
+            console.log(
+                "GPS:",
+                lat,
+                lng,
+                "精度:",
+                Math.round(accuracy) + " 米"
+            );
+        },
+
+        function(error) {
+
+            switch (error.code) {
+
+                case error.PERMISSION_DENIED:
+                    alert("你拒绝了定位权限，请在系统设置中允许此网页使用位置。");
+                    break;
+
+                case error.POSITION_UNAVAILABLE:
+                    alert("暂时无法获取 GPS 位置。");
+                    break;
+
+                case error.TIMEOUT:
+                    alert("GPS 定位超时，请稍后再试。");
+                    break;
+
+                default:
+                    alert("定位失败：" + error.message);
+            }
+        },
+
+        {
+            enableHighAccuracy: true,
+            timeout: 15000,
+            maximumAge: 5000
+        }
+    );
+};
 </script>
 
 </body>
