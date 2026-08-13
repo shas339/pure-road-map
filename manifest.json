@@ -1,0 +1,11 @@
+{
+  "name": "纯道路地图",
+  "short_name": "道路地图",
+  "description": "只有道路和道路名称的自定义地图",
+  "start_url": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#ffffff",
+  "theme_color": "#ffffff",
+  "icons": []
+}
